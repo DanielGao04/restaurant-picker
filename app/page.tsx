@@ -11,6 +11,7 @@ import { useGeolocation } from "@/hooks/useGeolocation"
 import type { Restaurant } from "@/lib/types"
 import Image from "next/image"
 import { motion, AnimatePresence } from "framer-motion"
+import { Instructions } from "@/components/Instructions"
 
 declare global {
   interface Window {
@@ -26,6 +27,7 @@ export default function RestaurantPicker() {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([])
   const [error, setError] = useState<string | null>(null)
   const [placesService, setPlacesService] = useState<any>(null)
+  const [isLogoSpinning, setIsLogoSpinning] = useState(false)
 
   useEffect(() => {
     // Load Google Maps JavaScript API
@@ -98,6 +100,7 @@ export default function RestaurantPicker() {
 
     setPickingRestaurant(true)
     setError(null)
+    setIsLogoSpinning(true)
 
     try {
       const nearbyRestaurants = await fetchNearbyRestaurants(location.lat, location.lng, distance[0])
@@ -105,6 +108,7 @@ export default function RestaurantPicker() {
       if (nearbyRestaurants.length === 0) {
         setError("No restaurants found in your area. Try increasing the search distance.")
         setPickingRestaurant(false)
+        setIsLogoSpinning(false)
         return
       }
 
@@ -118,6 +122,8 @@ export default function RestaurantPicker() {
       setError(err instanceof Error ? err.message : "Failed to find restaurants")
     } finally {
       setPickingRestaurant(false)
+      // Stop spinning after a short delay to ensure the animation completes
+      setTimeout(() => setIsLogoSpinning(false), 1000)
     }
   }
 
@@ -128,6 +134,7 @@ export default function RestaurantPicker() {
     }
 
     setPickingRestaurant(true)
+    setIsLogoSpinning(true)
 
     // Pick a different restaurant from the existing list
     const availableRestaurants = restaurants.filter((r) => r.id !== selectedRestaurant?.id)
@@ -142,6 +149,8 @@ export default function RestaurantPicker() {
     const randomRestaurant = availableRestaurants[randomIndex]
     setSelectedRestaurant(randomRestaurant)
     setPickingRestaurant(false)
+    // Stop spinning after a short delay to ensure the animation completes
+    setTimeout(() => setIsLogoSpinning(false), 1000)
   }
 
   const handleViewInMaps = () => {
@@ -172,6 +181,15 @@ export default function RestaurantPicker() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-orange-100 p-4 md:p-8">
       <div className="max-w-md mx-auto space-y-6">
+        {/* Instructions Panel */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          <Instructions />
+        </motion.div>
+
         {/* Header */}
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
@@ -182,7 +200,9 @@ export default function RestaurantPicker() {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ type: "spring", stiffness: 200, damping: 10 }}
-            className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-orange-500 to-red-500 rounded-full mb-6 shadow-lg"
+            className={`inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-orange-500 to-red-500 rounded-full mb-6 shadow-lg ${
+              isLogoSpinning ? 'animate-[spin_1s_ease-in-out]' : ''
+            }`}
           >
             <Utensils className="w-10 h-10 text-white" />
           </motion.div>
