@@ -187,9 +187,9 @@ export default function RestaurantPicker() {
             <Utensils className="w-10 h-10 text-white" />
           </motion.div>
           <h1 className="text-4xl font-bold text-gray-900 mb-3 bg-clip-text text-transparent bg-gradient-to-r from-orange-600 to-red-600">
-            Restaurant Roulette
+              Fork Fortune
           </h1>
-          <p className="text-gray-600 text-lg">Let fate decide your next meal</p>
+          <p className="text-gray-600 text-lg">Spin the fork, taste your fortune.</p>
         </motion.div>
 
         {/* Error Alert */}
